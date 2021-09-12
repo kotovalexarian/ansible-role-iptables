@@ -1,0 +1,64 @@
+########
+*filter
+########
+
+:INPUT   {{ 'DROP' if iptables__drop_by_default else 'ACCEPT' }} [0:0]
+:FORWARD DROP [0:0]
+:OUTPUT  {{ 'DROP' if iptables__drop_by_default else 'ACCEPT' }} [0:0]
+
+# Remove all rules from all chains,
+# delete all user-defined chains.
+-F
+-X
+
+{{ iptables__v6_filter_prepend }}
+
+# Allow all loopback (lo) traffic and reject anything
+# to localhost that does not originate from lo.
+-A INPUT   -i lo           -j ACCEPT
+-A INPUT ! -i lo -s ::/128 -j REJECT
+-A OUTPUT  -o lo           -j ACCEPT
+
+# Allow all outgoing traffic.
+{% if iptables__allow_output_ifaces %}
+{% for iface in iptables__allow_output_ifaces %}
+-A OUTPUT -o {{ iface }} -m conntrack --ctstate NEW,ESTABLISHED -j ACCEPT
+-A INPUT  -i {{ iface }} -m conntrack --ctstate ESTABLISHED     -j ACCEPT
+{% endfor %}
+{% else %}
+-A OUTPUT -m conntrack --ctstate NEW,ESTABLISHED -j ACCEPT
+-A INPUT  -m conntrack --ctstate ESTABLISHED     -j ACCEPT
+{% endif %}
+
+# Allow some important ICMP.
+-A INPUT  -p icmpv6 --icmpv6-type echo-request   -j ACCEPT
+-A OUTPUT -p icmpv6 --icmpv6-type echo-request   -j ACCEPT
+-A INPUT  -p icmpv6 --icmpv6-type echo-reply     -j ACCEPT
+-A OUTPUT -p icmpv6 --icmpv6-type echo-reply     -j ACCEPT
+-A INPUT  -p icmpv6 --icmpv6-type packet-too-big -j ACCEPT
+-A OUTPUT -p icmpv6 --icmpv6-type packet-too-big -j ACCEPT
+-A INPUT  -p icmpv6 --icmpv6-type time-exceeded  -j ACCEPT
+-A OUTPUT -p icmpv6 --icmpv6-type time-exceeded  -j ACCEPT
+# TODO: maybe it's better to only allow these inside private network?
+-A INPUT  -p icmpv6 --icmpv6-type router-solicitation     -j ACCEPT
+-A OUTPUT -p icmpv6 --icmpv6-type router-solicitation     -j ACCEPT
+-A INPUT  -p icmpv6 --icmpv6-type router-advertisement    -j ACCEPT
+-A OUTPUT -p icmpv6 --icmpv6-type router-advertisement    -j ACCEPT
+-A INPUT  -p icmpv6 --icmpv6-type neighbour-solicitation  -j ACCEPT
+-A OUTPUT -p icmpv6 --icmpv6-type neighbour-solicitation  -j ACCEPT
+-A INPUT  -p icmpv6 --icmpv6-type neighbour-advertisement -j ACCEPT
+-A OUTPUT -p icmpv6 --icmpv6-type neighbour-advertisement -j ACCEPT
+-A INPUT  -p icmpv6 --icmpv6-type redirect                -j ACCEPT
+-A OUTPUT -p icmpv6 --icmpv6-type redirect                -j ACCEPT
+
+# Deny other ICMPv6.
+-A INPUT  -p icmpv6 -j DROP
+-A OUTPUT -p icmpv6 -j DROP
+
+# Allow incoming SSH.
+-A INPUT  -p tcp --dport 22 -m conntrack --ctstate NEW,ESTABLISHED -j ACCEPT
+-A OUTPUT -p tcp --sport 22 -m conntrack --ctstate ESTABLISHED     -j ACCEPT
+
+{{ iptables__v6_filter_append }}
+
+COMMIT

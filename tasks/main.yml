@@ -1,0 +1,13 @@
+---
+- fail:
+    msg: 'Invalid `iptables__state`: {{ iptables__state }}'
+  when: (iptables__state != None) and
+        (iptables__state != 'purge') and
+        (iptables__state != 'remove') and
+        (iptables__state != 'install')
+- include_tasks: purge.yml
+  when: iptables__state == 'purge'
+- include_tasks: remove.yml
+  when: iptables__state == 'remove'
+- include_tasks: install.yml
+  when: iptables__state == 'install'

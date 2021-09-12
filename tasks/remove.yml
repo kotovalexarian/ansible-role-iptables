@@ -1,0 +1,8 @@
+---
+- name: Uninstall iptables-persistent
+  apt:
+    state: absent
+    purge: false
+    name:
+      - iptables-persistent
+      - netfilter-persistent
