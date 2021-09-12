@@ -1,3 +1,21 @@
+#####
+*nat
+#####
+
+:PREROUTING  ACCEPT [0:0]
+:INPUT       ACCEPT [0:0]
+:OUTPUT      ACCEPT [0:0]
+:POSTROUTING ACCEPT [0:0]
+
+# Remove all rules from all chains,
+# delete all user-defined chains.
+-F
+-X
+
+{{ iptables__v4_nat }}
+
+COMMIT
+
 ########
 *filter
 ########
