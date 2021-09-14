@@ -3,6 +3,10 @@ iptables__state: install
 iptables__drop_by_default: false
 iptables__allow_output_ifaces: []
 
+iptables__v4_filter_init: null
+iptables__v6_filter_init: null
+iptables__all_filter_init: null
+
 iptables__v4_filter_prepend: null
 iptables__v6_filter_prepend: null
 iptables__all_filter_prepend: null

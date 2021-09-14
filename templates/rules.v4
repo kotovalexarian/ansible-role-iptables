@@ -29,8 +29,10 @@ COMMIT
 -F
 -X
 
-{{ iptables__v4_filter_prepend }}
+{{ iptables__v4_filter_init }}
+{{ iptables__all_filter_init }}
 
+{{ iptables__v4_filter_prepend }}
 {{ iptables__all_filter_prepend }}
 
 # Allow all loopback (lo) traffic and reject anything
