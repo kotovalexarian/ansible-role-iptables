@@ -31,6 +31,8 @@ COMMIT
 
 {{ iptables__v4_filter_prepend }}
 
+{{ iptables__all_filter_prepend }}
+
 # Allow all loopback (lo) traffic and reject anything
 # to localhost that does not originate from lo.
 -A INPUT   -i lo                -j ACCEPT
