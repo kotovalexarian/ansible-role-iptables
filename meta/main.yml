@@ -11,6 +11,8 @@ galaxy_info:
 
   galaxy_tags:
     - iptables
+    - firewall
+    - networking
 
   platforms:
     - name: Debian
